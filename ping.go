@@ -22,7 +22,8 @@ const (
 
 // A Request represents an icmp echo request to be sent by a client.
 type Request struct {
-	sentAt time.Time // time at which echo request was sent
+	// sentAt time.Time // time at which echo request was sent
+	SentAt time.Time // time at which echo request was sent
 	dst    net.Addr  // useable destination address
 
 	ID   int    // ID is the ICMP ID. It is an identifier to aid in matching echos and replies when using privileged datagrams, may be zero.
@@ -34,7 +35,8 @@ type Request struct {
 
 // Response represents an icmp echo response received by a client.
 type Response struct {
-	rcvdAt time.Time // time at which echo response was received
+	// rcvdAt time.Time // time at which echo response was received
+	RcvdAt time.Time // time at which echo response was received
 
 	TotalLength int           // Length of internet header and data of the echo response in octets.
 	RTT         time.Duration // RTT is the round-trip time it took to ping.
@@ -118,8 +120,10 @@ func (c *Client) Do(ctx context.Context, req *Request) (*Response, error) {
 		return nil, err
 	}
 
-	resp.RTT = resp.rcvdAt.Sub(sentAt)
-	req.sentAt = sentAt
+	// resp.RTT = resp.rcvdAt.Sub(sentAt)
+	resp.RTT = resp.RcvdAt.Sub(sentAt)
+	// req.sentAt = sentAt
+	req.SentAt = sentAt
 	resp.Req = req
 
 	return resp, nil
@@ -255,7 +259,8 @@ func read4(ctx context.Context, conn *ipv4.PacketConn, req *Request) (*Response,
 				TotalLength: n,
 				Src:         net.ParseIP(srcHost),
 				Dst:         net.ParseIP(dstHost),
-				rcvdAt:      rcv,
+				// rcvdAt:      rcv,
+				RcvdAt: rcv,
 			}
 			if cm != nil {
 				resp.TTL = cm.TTL
@@ -321,7 +326,8 @@ func read6(ctx context.Context, conn *ipv6.PacketConn, req *Request) (*Response,
 				Src:         net.ParseIP(srcHost),
 				Dst:         net.ParseIP(dstHost),
 				TTL:         cm.HopLimit,
-				rcvdAt:      rcv,
+				// rcvdAt:      rcv,
+				RcvdAt: rcv,
 			}, nil
 		}
 	}
